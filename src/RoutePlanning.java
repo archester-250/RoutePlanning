@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class RoutePlanning {
 
@@ -75,6 +76,8 @@ public class RoutePlanning {
             // 计算适应度并排序
             population.sort(Comparator.comparingDouble(individual -> fitness(individual, customers, maxTime)));
 
+
+
             // 选择优秀个体
             List<int[]> nextGeneration = new ArrayList<>();
             for (int i = 0; i < populationSize / 2; i++) {
@@ -114,21 +117,28 @@ public class RoutePlanning {
         int n = customers.size();
         int totalTime = 0;
         double totalDistance = 0, totalCost = 0;
+
         for (int i = 0; i < n; i++) {
             Path path = customers.get(i).paths.get(individual[i]);
             totalTime += path.time;
             totalDistance += path.distance;
             totalCost += path.cost;
         }
-        if (totalTime > maxTime) return Double.MAX_VALUE; // 超过时间限制，设为无效
+
+        // 如果超过时间限制，返回高罚值，但不能返回 Double.MAX_VALUE
+        if (totalTime > maxTime) return 1e9; // 返回一个大罚值，而不是 Double.MAX_VALUE
+
+        // 计算目标函数
         return 0.5 * (totalDistance / n + totalCost / n);
     }
 
+
+
     public static void main(String[] args) {
         // 输入示例数据
-        int n = 50000; // 客户数量
-        int m = 3000; // 每个客户有3条路径
-        int maxTime = 100; // 时间限制
+        int n = 50; // 客户数量
+        int m = 10; // 每个客户有3条路径
+        int maxTime = 1500; // 时间限制
 
         List<Customer> customers = new ArrayList<>();
         Random random = new Random();
@@ -149,7 +159,7 @@ public class RoutePlanning {
 
         // 测试遗传算法
         long startGA = System.currentTimeMillis();
-        double resultGA = geneticAlgorithm(customers, maxTime, 200, 100);
+        double resultGA = geneticAlgorithm(customers, maxTime, 50, 100);
         long endGA = System.currentTimeMillis();
         System.out.println("Genetic Algorithm Result: " + resultGA);
         System.out.println("Genetic Algorithm Time: " + (endGA - startGA) + "ms");
